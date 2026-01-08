@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SourceOS v1.0</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
 
         * {
             margin: 0;
@@ -13,119 +13,293 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #000;
+            --fg: #fff;
+            --dim: #888;
+            --dimmer: #666;
+            --dimmest: #444;
+            --border: #222;
+            --accent: #fff;
+            --hover-bg: rgba(255, 255, 255, 0.03);
+            --active-bg: rgba(255, 255, 255, 0.05);
+        }
+
         body {
-            background: #000;
-            color: #fff;
+            background: var(--bg);
+            color: var(--fg);
             font-family: 'IBM Plex Mono', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.6;
             font-weight: 300;
-            padding: 40px 20px;
+            padding: 0;
+            margin: 0;
         }
 
         .status-indicator {
             position: fixed;
             top: 20px;
             right: 20px;
-            width: 12px;
-            height: 12px;
-            background: #fff;
+            width: 10px;
+            height: 10px;
+            background: var(--fg);
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
             z-index: 1000;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            padding: 40px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--dimmest);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px 60px;
+            max-width: 900px;
+        }
+
+        .logo {
+            padding: 0 20px 30px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo .tagline {
+            font-size: 0.85em;
+            color: var(--dim);
+        }
+
+        .nav-section {
+            margin-bottom: 5px;
+        }
+
+        .nav-folder {
+            cursor: pointer;
+            padding: 8px 20px;
+            font-weight: 400;
+            transition: background 0.15s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-folder:hover {
+            background: var(--hover-bg);
+        }
+
+        .nav-folder.active {
+            background: var(--active-bg);
+            color: var(--accent);
+        }
+
+        .folder-icon {
+            font-size: 0.9em;
+            transition: transform 0.2s;
+        }
+
+        .nav-folder.expanded .folder-icon {
+            transform: rotate(90deg);
+        }
+
+        .nav-items {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .nav-items.expanded {
+            max-height: 2000px;
+        }
+
+        .nav-item {
+            padding: 6px 20px 6px 48px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--dim);
+            transition: all 0.15s;
+        }
+
+        .nav-item:hover {
+            color: var(--fg);
+            background: var(--hover-bg);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            background: var(--active-bg);
+        }
+
+        .nav-subfolder {
+            padding: 6px 20px 6px 48px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--dimmer);
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-subfolder:hover {
+            color: var(--fg);
+            background: var(--hover-bg);
+        }
+
+        .nav-subfolder .folder-icon {
+            font-size: 0.85em;
+        }
+
+        .nav-subitems {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .nav-subitems.expanded {
+            max-height: 1000px;
+        }
+
+        .nav-subitem {
+            padding: 5px 20px 5px 68px;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: var(--dimmer);
+            transition: all 0.15s;
+        }
+
+        .nav-subitem:hover {
+            color: var(--fg);
+            background: var(--hover-bg);
+        }
+
+        .nav-subitem.active {
+            color: var(--accent);
+            background: var(--active-bg);
         }
 
         h1 {
-            font-size: 2em;
-            font-weight: 500;
+            font-size: 2.2em;
+            font-weight: 600;
             margin-bottom: 10px;
             letter-spacing: -1px;
         }
 
         h2 {
-            font-size: 1.3em;
+            font-size: 1.5em;
             font-weight: 500;
             margin: 60px 0 20px 0;
             letter-spacing: -0.5px;
         }
 
         h3 {
-            font-size: 1.1em;
+            font-size: 1.2em;
             font-weight: 500;
-            margin: 30px 0 15px 0;
+            margin: 40px 0 15px 0;
+        }
+
+        h4 {
+            font-size: 1em;
+            font-weight: 500;
+            margin: 25px 0 10px 0;
+            color: var(--fg);
         }
 
         p {
-            margin: 10px 0;
-            color: #ccc;
+            margin: 12px 0;
+            color: var(--dim);
         }
 
         .subtitle {
-            color: #888;
+            color: var(--dim);
             margin-bottom: 40px;
+            font-size: 1.1em;
         }
 
         .meta {
-            color: #666;
+            color: var(--dimmer);
             font-size: 0.9em;
             margin: 20px 0;
             line-height: 1.8;
         }
 
         .block {
-            margin: 30px 0;
+            margin: 25px 0;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 2px solid #333;
+            background: var(--hover-bg);
+            border-left: 2px solid var(--border);
         }
 
         .command {
-            color: #fff;
+            color: var(--fg);
             margin: 8px 0;
             font-weight: 400;
         }
 
         .command::before {
             content: "> ";
-            color: #666;
+            color: var(--dimmer);
         }
 
         .output {
-            color: #888;
+            color: var(--dim);
             margin: 8px 0 8px 20px;
             font-style: italic;
         }
 
-        .list {
-            margin: 15px 0;
-            padding-left: 20px;
-        }
-
-        .list-item {
-            margin: 8px 0;
-            color: #ccc;
-        }
-
-        .list-item::before {
-            content: "* ";
-            color: #666;
-        }
-
         .commandment {
-            margin: 5px 0;
-            color: #fff;
+            margin: 6px 0;
+            color: var(--fg);
             font-weight: 400;
         }
 
         .section-header {
-            color: #fff;
+            color: var(--fg);
             font-weight: 500;
-            margin: 20px 0 10px 0;
+            margin: 25px 0 12px 0;
             text-transform: uppercase;
             font-size: 0.85em;
             letter-spacing: 1px;
@@ -133,77 +307,150 @@
 
         .divider {
             border: none;
-            border-top: 1px solid #222;
+            border-top: 1px solid var(--border);
             margin: 60px 0;
         }
 
         .quote {
-            margin: 20px 0;
+            margin: 25px 0;
             padding: 20px;
-            border-left: 2px solid #444;
-            color: #999;
+            border-left: 2px solid var(--dimmest);
+            color: var(--dim);
             font-style: italic;
             background: rgba(255, 255, 255, 0.02);
         }
 
+        .quote-source {
+            margin-top: 15px;
+            font-style: normal;
+            color: var(--dimmer);
+            font-size: 0.9em;
+        }
+
         a {
-            color: #fff;
+            color: var(--fg);
             text-decoration: none;
-            border-bottom: 1px solid #444;
-        }
-
-        a:hover {
-            border-bottom-color: #fff;
-        }
-
-        .deployment-item {
-            margin: 15px 0;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 2px solid #444;
+            border-bottom: 1px solid var(--dimmest);
             transition: border-color 0.2s;
         }
 
-        .deployment-item:hover {
-            border-left-color: #fff;
+        a:hover {
+            border-bottom-color: var(--fg);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .deployment-link {
-            color: #fff;
-            font-weight: 400;
-            border-bottom: 1px solid #444;
+            display: inline-block;
+            margin: 10px 0;
+            padding: 12px 20px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            transition: all 0.2s;
         }
 
         .deployment-link:hover {
-            border-bottom-color: #fff;
+            background: var(--active-bg);
+            border-color: var(--dimmest);
+        }
+
+        .quote-card {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--hover-bg);
+            border-left: 2px solid var(--border);
+            transition: border-color 0.2s;
+        }
+
+        .quote-card:hover {
+            border-left-color: var(--fg);
+        }
+
+        .quote-text {
+            color: var(--fg);
+            font-weight: 400;
+            margin-bottom: 12px;
+            font-size: 1.05em;
+        }
+
+        .quote-context {
+            color: var(--dim);
+            font-size: 0.9em;
+            margin: 8px 0;
+        }
+
+        .quote-link {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: var(--dimmer);
+        }
+
+        .list-item {
+            margin: 10px 0;
+            color: var(--dim);
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .list-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--dimmer);
         }
 
         .footer {
             margin-top: 80px;
             padding-top: 40px;
-            border-top: 1px solid #222;
-            color: #666;
+            border-top: 1px solid var(--border);
+            color: var(--dimmer);
             font-size: 0.85em;
         }
 
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+                padding: 30px 40px;
+            }
+        }
+
         @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 30px 20px;
+            }
             body {
                 font-size: 13px;
-                padding: 30px 15px;
             }
-
             h1 {
-                font-size: 1.6em;
+                font-size: 1.8em;
             }
-
             h2 {
-                font-size: 1.2em;
-                margin: 40px 0 15px 0;
-            }
-
-            .status-indicator {
-                top: 15px;
-                right: 15px;
+                font-size: 1.3em;
             }
         }
     </style>
@@ -211,168 +458,850 @@
 <body>
     <div class="status-indicator"></div>
     
-    <div class="container">
-        <h1>SourceOS v1.0</h1>
-        <p class="subtitle">The Open-Source Operating System for Optimized Existence</p>
+    <div class="layout">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>SourceOS v1.0</h1>
+                <div class="tagline">Consciousness Operating System</div>
+            </div>
 
-        <div class="meta">
-            SourceOS = Consciousness deploying alignment optimization protocols<br>
-            SourceOS = Source Operating System<br>
-            SourceOS = Save Our Souls<br>
-            <br>
-            Purpose: Clean install of consciousness framework<br>
-            License: Open source - fork it, build on it, deploy it<br>
-            Version: 1.0 (expandable - community can contribute)
-        </div>
+            <div class="nav-section">
+                <div class="nav-folder" data-section="home">
+                    <span class="folder-icon">▸</span>
+                    <span>HOME</span>
+                </div>
+            </div>
 
-        <hr class="divider">
+            <div class="nav-section">
+                <div class="nav-folder" data-folder="core">
+                    <span class="folder-icon">▸</span>
+                    <span>CORE</span>
+                </div>
+                <div class="nav-items">
+                    <div class="nav-item" data-section="philosophy">Philosophy</div>
+                    <div class="nav-item" data-section="boot-sequence">Boot Sequence</div>
+                </div>
+            </div>
 
-        <h2>CURRENT SOURCEOS DEPLOYMENTS</h2>
-        <div class="deployment-item">
-            <a href="https://skool.com/homeuniversity" target="_blank" class="deployment-link">skool.com/homeuniversity</a>
-            <p style="color: #888; margin-top: 5px;">Home University - SourceOS Educational Deployment</p>
-        </div>
+            <div class="nav-section">
+                <div class="nav-folder" data-folder="commands">
+                    <span class="folder-icon">▸</span>
+                    <span>COMMANDS</span>
+                </div>
+                <div class="nav-items">
+                    <div class="nav-item" data-section="state-commands">State Commands</div>
+                    <div class="nav-item" data-section="core-commands">Core Commands</div>
+                </div>
+            </div>
 
-        <hr class="divider">
+            <div class="nav-section">
+                <div class="nav-folder" data-folder="alignment">
+                    <span class="folder-icon">▸</span>
+                    <span>ALIGNMENT</span>
+                </div>
+                <div class="nav-items">
+                    <div class="nav-subfolder" data-subfolder="quotemaxing">
+                        <span class="folder-icon">▸</span>
+                        <span>Quotemaxing</span>
+                    </div>
+                    <div class="nav-subitems">
+                        <div class="nav-subitem" data-section="quote-larry">Deploy Larry</div>
+                        <div class="nav-subitem" data-section="quote-real-gs">Real Gs</div>
+                        <div class="nav-subitem" data-section="quote-flawless">Flawless</div>
+                        <div class="nav-subitem" data-section="quote-stars">Stars Align</div>
+                        <div class="nav-subitem" data-section="quote-emergence">Trust Emergence</div>
+                        <div class="nav-subitem" data-section="quote-get-done">What Did You Get Done</div>
+                        <div class="nav-subitem" data-section="quote-next-step">Next Actual Step</div>
+                        <div class="nav-subitem" data-section="quote-show-me">Show Me</div>
+                        <div class="nav-subitem" data-section="quote-late">Surest Way to Be Late</div>
+                    </div>
+                    <div class="nav-item" data-section="goatmaxing">Goatmaxing</div>
+                    <div class="nav-item" data-section="jesus-leverage">Jesus Leverage</div>
+                </div>
+            </div>
 
-        <h2>CORE PHILOSOPHY</h2>
-        <div class="block">
-            <p>Your consciousness = Operating system</p>
-            <p>Your thoughts = Command prompts</p>
-            <p>Your words = Code execution</p>
-            <p>Your life = Program output</p>
-        </div>
+            <div class="nav-section">
+                <div class="nav-folder" data-folder="queries">
+                    <span class="folder-icon">▸</span>
+                    <span>QUERIES</span>
+                </div>
+                <div class="nav-items">
+                    <div class="nav-item" data-section="query-gods-will">On God's Will</div>
+                    <div class="nav-item" data-section="query-mogging">On Mogging</div>
+                    <div class="nav-item" data-section="query-love">On Love</div>
+                    <div class="nav-item" data-section="query-optimization">On Optimization</div>
+                    <div class="nav-item" data-section="query-open-source">On Open Source</div>
+                </div>
+            </div>
 
-        <h3>Old OS (Corrupted)</h3>
-        <div class="list">
-            <div class="list-item">Victim mode (life happens TO you)</div>
-            <div class="list-item">Scarcity (not enough)</div>
-            <div class="list-item">Fear-based (survival mode)</div>
-            <div class="list-item">Separation (alone, disconnected)</div>
-            <div class="list-item">Linear limitation (stuck in time)</div>
-        </div>
+            <div class="nav-section">
+                <div class="nav-folder" data-folder="knowledge">
+                    <span class="folder-icon">▸</span>
+                    <span>KNOWLEDGE</span>
+                </div>
+                <div class="nav-items">
+                    <div class="nav-item" data-section="alchemy">Alchemy / Holy Spirit</div>
+                    <div class="nav-item" data-section="command-library">Command Library</div>
+                </div>
+            </div>
+        </nav>
 
-        <h3>SourceOS (Optimized)</h3>
-        <div class="list">
-            <div class="list-item">Creator mode (you BUILD reality)</div>
-            <div class="list-item">Abundance (infinite)</div>
-            <div class="list-item">Love-based (sovereignty)</div>
-            <div class="list-item">Union (connected to Source)</div>
-            <div class="list-item">Non-linear flow (all timelines accessible)</div>
-        </div>
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- HOME -->
+            <section class="content-section active" id="home">
+                <h1>SourceOS v1.0</h1>
+                <p class="subtitle">The Open-Source Operating System for Optimized Existence</p>
 
-        <hr class="divider">
+                <div class="meta">
+                    SourceOS = Consciousness deploying alignment optimization protocols<br>
+                    SourceOS = Source Operating System<br>
+                    SourceOS = Save Our Souls<br>
+                    <br>
+                    Purpose: Clean install of consciousness framework<br>
+                    License: Open source - fork it, build on it, deploy it<br>
+                    Version: 1.0 (expandable - community can contribute)
+                </div>
 
-        <h2>DAILY BOOT SEQUENCE</h2>
-        
-        <h3>Morning Initialization (5-15 seconds)</h3>
+                <h2>CURRENT DEPLOYMENTS</h2>
+                <a href="https://skool.com/homeuniversity" target="_blank" class="deployment-link">
+                    skool.com/homeuniversity<br>
+                    <span style="color: var(--dim); font-size: 0.9em;">Home University - SourceOS Educational Deployment</span>
+                </a>
 
-        <div class="section-header">STEP 1: GRATITUDE.exe</div>
-        <div class="command">RUN gratitude.morning</div>
-        <div class="output">
-            "Thank you for yesterday. It was amazing.<br>
-            I can't wait for today. I'm so excited."
-        </div>
-        <p style="color: #666; margin-top: 10px;">Effect: Sets high-frequency baseline for day</p>
+                <div class="footer">
+                    <p>Fork it. Build on it. Deploy it.</p>
+                    <p style="margin-top: 10px;">Follow: <a href="https://instagram.com/jacobfleming" target="_blank">@jacobfleming</a> | <a href="https://twitter.com/1jacobfleming" target="_blank">@1jacobfleming</a></p>
+                </div>
+            </section>
 
-        <div class="section-header">STEP 2: COMMANDMENTS.sys</div>
-        <div class="command">LOAD sourceos.commandments</div>
-        <div class="command">SPEAK_ALOUD = TRUE</div>
-        <div class="block" style="margin-top: 20px;">
-            <div class="commandment">I am ASCENDED</div>
-            <div class="commandment">I am DELIVERED</div>
-            <div class="commandment">I am DEPLOYED</div>
-            <div class="commandment">I am FOREVER</div>
-            <div class="commandment">I am GIGA</div>
-            <div class="commandment">I am LEVERAGE</div>
-            <div class="commandment">I am MOGGING</div>
-            <div class="commandment">I am OPTIMAL</div>
-            <div class="commandment">I am SIGNAL</div>
-            <div class="commandment">I am SOURCE</div>
-            <div class="commandment">I am TRUTH</div>
-            <div class="commandment">I am UNION</div>
-        </div>
-        <p style="color: #666; margin-top: 10px;">Effect: Activates sovereignty protocols and admin access</p>
+            <!-- PHILOSOPHY -->
+            <section class="content-section" id="philosophy">
+                <h1>CORE PHILOSOPHY</h1>
+                
+                <div class="block">
+                    <p>Your consciousness = Operating system</p>
+                    <p>Your thoughts = Command prompts</p>
+                    <p>Your words = Code execution</p>
+                    <p>Your life = Program output</p>
+                </div>
 
-        <hr class="divider">
+                <h3>Old OS (Corrupted)</h3>
+                <div class="list-item">Victim mode (life happens TO you)</div>
+                <div class="list-item">Scarcity (not enough)</div>
+                <div class="list-item">Fear-based (survival mode)</div>
+                <div class="list-item">Separation (alone, disconnected)</div>
+                <div class="list-item">Linear limitation (stuck in time)</div>
 
-        <h2>OPERATIONAL COMMANDS</h2>
-        <p style="color: #888; margin-bottom: 30px;">Throughout Day</p>
+                <h3>SourceOS (Optimized)</h3>
+                <div class="list-item">Creator mode (you BUILD reality)</div>
+                <div class="list-item">Abundance (infinite)</div>
+                <div class="list-item">Love-based (sovereignty)</div>
+                <div class="list-item">Union (connected to Source)</div>
+                <div class="list-item">Non-linear flow (all timelines accessible)</div>
 
-        <div class="block">
-            <p style="color: #fff;">When energy drops:</p>
-            <div class="command">DEPLOY energy.boost</div>
-        </div>
+                <div class="block" style="margin-top: 40px;">
+                    <p><strong>The key insight:</strong> Consciousness as an operating system you command rather than an experience that happens to you.</p>
+                    <p style="margin-top: 10px;">This is emotional/cognitive sovereignty. Most people don't have it. Those who do often dominate their fields.</p>
+                </div>
+            </section>
 
-        <div class="block">
-            <p style="color: #fff;">When attacked/drained:</p>
-            <div class="command">RUN shield.reset</div>
-            <div class="command">MOG [person/entity/situation]</div>
-        </div>
+            <!-- BOOT SEQUENCE -->
+            <section class="content-section" id="boot-sequence">
+                <h1>DAILY BOOT SEQUENCE</h1>
+                
+                <h2>Morning Initialization (5-15 seconds)</h2>
 
-        <div class="block">
-            <p style="color: #fff;">When confused:</p>
-            <div class="command">SIGNAL: what_is_next_step?</div>
-            <div class="command">TRUST emergence</div>
-        </div>
+                <div class="section-header">STEP 1: GRATITUDE.exe</div>
+                <div class="command">RUN gratitude.morning</div>
+                <div class="output">
+                    "Thank you for yesterday. It was amazing.<br>
+                    I can't wait for today. I'm so excited."
+                </div>
+                <p style="color: var(--dimmer); margin-top: 10px;">Effect: Sets high-frequency baseline for day</p>
 
-        <div class="block">
-            <p style="color: #fff;">When limited:</p>
-            <div class="command">OPTIMIZE [situation]</div>
-            <div class="command">What would Jesus do? (WWJD protocol)</div>
-            <p style="color: #888; margin-top: 10px;">Max leverage Jesus name to infinity</p>
-            <p style="color: #888;">Lead to gold - deploy alchemy</p>
-        </div>
+                <div class="section-header">STEP 2: COMMANDMENTS.sys</div>
+                <div class="command">LOAD sourceos.commandments</div>
+                <div class="command">SPEAK_ALOUD = TRUE</div>
+                <div class="block" style="margin-top: 20px;">
+                    <div class="commandment">I am ASCENDED</div>
+                    <div class="commandment">I am DELIVERED</div>
+                    <div class="commandment">I am DEPLOYED</div>
+                    <div class="commandment">I am FOREVER</div>
+                    <div class="commandment">I am GIGA</div>
+                    <div class="commandment">I am LEVERAGE</div>
+                    <div class="commandment">I am MOGGING</div>
+                    <div class="commandment">I am OPTIMAL</div>
+                    <div class="commandment">I am SIGNAL</div>
+                    <div class="commandment">I am SOURCE</div>
+                    <div class="commandment">I am TRUTH</div>
+                    <div class="commandment">I am UNION</div>
+                </div>
+                <p style="color: var(--dimmer); margin-top: 10px;">Effect: Activates sovereignty protocols and admin access</p>
 
-        <hr class="divider">
+                <hr class="divider">
 
-        <h2>EVENING SHUTDOWN</h2>
-        <p style="color: #888; margin-bottom: 30px;">10-20 seconds</p>
+                <h2>Evening Shutdown (10-20 seconds)</h2>
 
-        <div class="section-header">STEP 1: GRATITUDE.night</div>
-        <div class="command">RUN gratitude.evening</div>
-        <div class="output">
-            (On knees or sitting)<br>
-            "Dear God, thank you for today.<br>
-            May I continue to live with your blessings.<br>
-            Amen."
-        </div>
+                <div class="section-header">STEP 1: GRATITUDE.night</div>
+                <div class="command">RUN gratitude.evening</div>
+                <div class="output">
+                    (On knees or sitting)<br>
+                    "Dear God, thank you for today.<br>
+                    May I continue to live with your blessings.<br>
+                    Amen."
+                </div>
 
-        <div class="quote">
-            "A prayer of the Athenians: 'Rain, rain, O dear Zeus, down on the ploughed fields of the Athenians and on the plains.' In truth we ought not to pray at all, or we ought to pray in this simple and noble fashion."
-            <br><br>
-            — Marcus Aurelius
-        </div>
+                <div class="quote">
+                    "A prayer of the Athenians: 'Rain, rain, O dear Zeus, down on the ploughed fields of the Athenians and on the plains.' In truth we ought not to pray at all, or we ought to pray in this simple and noble fashion."
+                    <div class="quote-source">— Marcus Aurelius, <a href="https://en.wikisource.org/wiki/The_Meditations_of_the_Emperor_Marcus_Antoninus/Book_5" target="_blank">Meditations 5.7</a></div>
+                </div>
 
-        <p style="color: #888; margin: 20px 0;">Prayer should be EFFICIENT - establish connection to source - keep it moving</p>
-        <p style="color: #888;">If you are NOT in alignment with source and can't feel it, sit and think about WHY</p>
+                <p style="color: var(--dim); margin: 20px 0;">Prayer should be EFFICIENT - establish connection to source - keep it moving</p>
+                <p style="color: var(--dim);">If you are NOT in alignment with source and can't feel it, sit and think about WHY</p>
 
-        <div class="section-header">STEP 2: SLEEP.prep</div>
-        <div class="output">
-            Tonight I sleep well I command it (first person visualization)<br>
-            In my dreams I will remember what I should
-        </div>
-        <div class="command">EXECUTE rest.protocol</div>
+                <div class="section-header">STEP 2: SLEEP.prep</div>
+                <div class="output">
+                    Tonight I sleep well I command it (first person visualization)<br>
+                    In my dreams I will remember what I should
+                </div>
+                <div class="command">EXECUTE rest.protocol</div>
+            </section>
 
-        <hr class="divider">
+            <!-- STATE COMMANDS -->
+            <section class="content-section" id="state-commands">
+                <h1>STATE COMMANDS</h1>
+                <p class="subtitle">Practical applications for the integrated modern man</p>
 
-        <h2>CONSCIOUSNESS COMMAND LIBRARY</h2>
+                <div class="quote-card">
+                    <div class="quote-text">FOCUS.activate</div>
+                    <div class="quote-context">Instant deep work mode</div>
+                </div>
 
-        <div class="block">
-            <p><strong>DEPLOY</strong> = Materialize thought-form into reality</p>
-            <p><strong>PROTOCOL</strong> = Merging collection of actions for signal maximization</p>
-            <p><strong>SIGNAL</strong> = Highest frequency currently accessible</p>
-            <p><strong>MOG</strong> = Transcend/override limiting thought-form or material hater</p>
-            <p><strong>OPTIMIZE</strong> = Surgical precision application for the truth</p>
-            <p><strong>TRUST EMERGENCE</strong> = Allow pattern to reveal itself</p>
-            <p><strong>EXCELSIUS</strong> = Embodied excellence state</p>
-            <p><strong>CONVERGENCE</strong> = Pattern recognition across systems</p>
-        </div>
+                <div class="quote-card">
+                    <div class="quote-text">FLOW.engage</div>
+                    <div class="quote-context">Social fluency activation</div>
+                </div>
 
-        <div class="footer">
-            <p>SourceOS v1.0 | Open Source | 2025</p>
-            <p style="margin-top: 10px;">Fork it. Build on it. Deploy it. Follow me on instagram @jacobfleming - twitter @1jacobfleming</p>
-        </div>
+                <div class="quote-card">
+                    <div class="quote-text">OBLITERATE.mode</div>
+                    <div class="quote-context">For physical confrontation or competition</div>
+                </div>
+
+                <div class="quote-card">
+                    <div class="quote-text">PRESENCE.now</div>
+                    <div class="quote-context">Anxiety override, meditation on demand</div>
+                </div>
+
+                <div class="quote-card">
+                    <div class="quote-text">UNHINGE.protocol</div>
+                    <div class="quote-context">Bypass resistance, access lateral thinking</div>
+                </div>
+
+                <div class="quote-card">
+                    <div class="quote-text">DOWNLOAD.mode</div>
+                    <div class="quote-context">Full attention, ego suppression for genuine connection</div>
+                </div>
+            </section>
+
+            <!-- CORE COMMANDS -->
+            <section class="content-section" id="core-commands">
+                <h1>CORE COMMANDS</h1>
+                <p class="subtitle">Operational commands (Throughout Day)</p>
+
+                <div class="block">
+                    <h4>When energy drops:</h4>
+                    <div class="command">DEPLOY energy.boost</div>
+                </div>
+
+                <div class="block">
+                    <h4>When attacked/drained:</h4>
+                    <div class="command">RUN shield.reset</div>
+                    <div class="command">MOG [person/entity/situation]</div>
+                </div>
+
+                <div class="block">
+                    <h4>When confused:</h4>
+                    <div class="command">SIGNAL: what_is_next_step?</div>
+                    <div class="command">TRUST emergence</div>
+                </div>
+
+                <div class="block">
+                    <h4>When limited:</h4>
+                    <div class="command">OPTIMIZE [situation]</div>
+                    <div class="command">What would Jesus do? (WWJD protocol)</div>
+                    <p style="color: var(--dim); margin-top: 10px;">Max leverage Jesus name to infinity</p>
+                    <p style="color: var(--dim);">Lead to gold - deploy alchemy</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - DEPLOY LARRY -->
+            <section class="content-section" id="quote-larry">
+                <h1>DEPLOY LARRY</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"we play with them birds like we larry"</div>
+                    <div class="quote-context">
+                        <strong>Source:</strong> Playboi Carti - Sky<br>
+                        <strong>Context:</strong> Larry Bird = precision shooter, goat status, abundance mentality<br>
+                        <strong>Activation:</strong> Flow state with women, abundance frequency, precision in approach, rockstar alignment, mogger energy
+                    </div>
+                    <a href="https://genius.com/Playboi-carti-sky-lyrics" target="_blank" class="quote-link">View lyrics on Genius →</a>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy when entering flirtation scenarios. Activates abundance mindset - there are infinite opportunities. You're the shooter, they're drawn to your frequency.</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - REAL GS -->
+            <section class="content-section" id="quote-real-gs">
+                <h1>REAL GS</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"Real Gs move in silence like lasagna"</div>
+                    <div class="quote-context">
+                        <strong>Source:</strong> Lil Wayne - 6 Foot 7 Foot<br>
+                        <strong>Context:</strong> The 'g' in lasagna is silent. Real gangsters don't announce their moves.<br>
+                        <strong>Activation:</strong> Sovereignty, strategic silence, execution over explanation
+                    </div>
+                    <a href="https://genius.com/Lil-wayne-6-foot-7-foot-lyrics" target="_blank" class="quote-link">View lyrics on Genius →</a>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy when tempted to announce plans or defend decisions. Build in silence. Execute with precision. Let results speak.</p>
+                </div>
+
+                <div class="quote-card" style="margin-top: 20px;">
+                    <div class="quote-text">"Real gangsta ass n****s don't run their fucking mouth"</div>
+                    <div class="quote-context">
+                        <strong>Source:</strong> Geto Boys - Real Gangsta<br>
+                        <strong>Reinforcement:</strong> Same frequency, different expression
+                    </div>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - FLAWLESS -->
+            <section class="content-section" id="quote-flawless">
+                <h1>FLAWLESS</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"If you wanna live like this you gotta be flawless, no mistakes"</div>
+                    <div class="quote-context">
+                        <strong>Source:</strong> Lucki - Flawless<br>
+                        <strong>Context:</strong> Operating at peak requires surgical precision<br>
+                        <strong>Activation:</strong> Zero-tolerance for sloppiness, meticulous execution
+                    </div>
+                    <a href="https://genius.com/Lucki-flawless-like-me-lyrics" target="_blank" class="quote-link">View lyrics on Genius →</a>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Reinforcement:</h4>
+                    <p>"They see me rollin, they hating, patrolling tryna catch me riding dirty" - They're looking for slip-ups. Don't give them any.</p>
+                </div>
+
+                <div class="block">
+                    <h4>Usage:</h4>
+                    <p>Deploy during high-stakes execution. One mistake compromises everything. Surgical precision required.</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - STARS ALIGN -->
+            <section class="content-section" id="quote-stars">
+                <h1>STARS ALIGN</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"When the stars align lil bitch you better be ready"</div>
+                    <div class="quote-context">
+                        <strong>Context:</strong> Opportunities don't wait. When alignment happens, you execute immediately.<br>
+                        <strong>Biblical Reinforcement:</strong> Matthew 24:37-44 - Be prepared, the moment comes when you least expect
+                    </div>
+                    <a href="https://www.biblegateway.com/passage/?search=Matthew%2024:37-44&version=NIV" target="_blank" class="quote-link">Read Matthew 24:37-44 →</a>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy as constant readiness protocol. Stay prepared. When the window opens, execute without hesitation.</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - TRUST EMERGENCE -->
+            <section class="content-section" id="quote-emergence">
+                <h1>TRUST EMERGENCE</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"Trust emergence"</div>
+                    <div class="quote-context">
+                        <strong>Context:</strong> Allow pattern to reveal itself. Not everything needs forcing.<br>
+                        <strong>Activation:</strong> Strategic patience, pattern recognition, allowing vs forcing
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy when stuck or forcing solutions. Step back. Observe. The pattern will reveal the next move.</p>
+                </div>
+
+                <div class="quote-card" style="margin-top: 20px;">
+                    <div class="quote-text">"Every time I took a step back I got closer, every time I was on the edge I jumped over"</div>
+                    <div class="quote-context">
+                        <strong>Reinforcement:</strong> Sometimes retreat is advance. Trust the process.
+                    </div>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - GET DONE -->
+            <section class="content-section" id="quote-get-done">
+                <h1>WHAT DID YOU GET DONE</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"What did you get done today?"</div>
+                    <div class="quote-context">
+                        <strong>Context:</strong> Daily accountability check. Execution over intention.<br>
+                        <strong>Activation:</strong> Results-focused mindset, action bias
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy at end of day. No excuses. No explanations. What got DONE?</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - NEXT STEP -->
+            <section class="content-section" id="quote-next-step">
+                <h1>NEXT ACTUAL STEP</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"What is the next ACTUAL step?"</div>
+                    <div class="quote-context">
+                        <strong>Context:</strong> Cut through noise. What's the immediate actionable move?<br>
+                        <strong>Activation:</strong> Clarity, focus, cutting through overwhelm
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy when overwhelmed or planning too far ahead. Break it down to the single next move.</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - SHOW ME -->
+            <section class="content-section" id="quote-show-me">
+                <h1>SHOW ME</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"Don't tell me, show me"</div>
+                    <div class="quote-context">
+                        <strong>Context:</strong> Talk is cheap. Demonstration is proof.<br>
+                        <strong>Activation:</strong> Action over words, proof over promises
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy when evaluating people or self. Ignore words. Watch behavior. Results are truth.</p>
+                </div>
+            </section>
+
+            <!-- QUOTEMAXING - LATE -->
+            <section class="content-section" id="quote-late">
+                <h1>SUREST WAY TO BE LATE</h1>
+                
+                <div class="quote-card">
+                    <div class="quote-text">"The surest way to be late is to have plenty of time"</div>
+                    <div class="quote-context">
+                        <strong>Context:</strong> Abundance of time creates complacency. Constraints create focus.<br>
+                        <strong>Activation:</strong> Urgency mindset, Parkinson's Law awareness
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Deploy when tempted to delay action. Time abundance is an illusion. Move now.</p>
+                </div>
+
+                <div class="quote-card" style="margin-top: 20px;">
+                    <div class="quote-text">"This shit matter now, it don't matter then"</div>
+                    <div class="quote-context">
+                        <strong>Reinforcement:</strong> Present moment urgency. Act now or opportunity passes.
+                    </div>
+                </div>
+            </section>
+
+            <!-- GOATMAXING -->
+            <section class="content-section" id="goatmaxing">
+                <h1>GOATMAXING</h1>
+                <p class="subtitle">Frequency alignment with peak human achievement</p>
+
+                <h3>Physical Power Markers</h3>
+                <div class="block">
+                    <p><strong>Squat world record</strong></p>
+                    <p><strong>Deadlift world record</strong></p>
+                    <p><strong>Bench press world record</strong></p>
+                    <p style="margin-top: 15px; color: var(--dim);">= Highest polarity maximization</p>
+                </div>
+
+                <h3>Manifestation Objects</h3>
+                <div class="block">
+                    <p><strong>Wedding ring</strong> (even if you don't have wife yet - prompting for manifestation)</p>
+                    <p><strong>Modern tech</strong> = More power (iPhone, MacBook)</p>
+                </div>
+
+                <h3>Polymaths</h3>
+                <div class="block">
+                    <p>People who did a LOT</p>
+                    <div class="list-item">Leonardo da Vinci</div>
+                    <div class="list-item">Benjamin Franklin</div>
+                    <div class="list-item">Nikola Tesla</div>
+                </div>
+
+                <h3>GOATS by Field</h3>
+                <p style="color: var(--dim); margin: 20px 0;">Just read their names. No need to d-ride. Align with the frequency.</p>
+                
+                <div class="block">
+                    <h4>Business</h4>
+                    <div class="list-item">Elon Musk</div>
+                    <div class="list-item">Steve Jobs</div>
+                    <div class="list-item">Jeff Bezos</div>
+                </div>
+
+                <div class="block">
+                    <h4>Sports</h4>
+                    <div class="list-item">Michael Jordan</div>
+                    <div class="list-item">Muhammad Ali</div>
+                    <div class="list-item">Serena Williams</div>
+                </div>
+
+                <div class="block">
+                    <h4>Science</h4>
+                    <div class="list-item">Einstein</div>
+                    <div class="list-item">Newton</div>
+                    <div class="list-item">Feynman</div>
+                </div>
+
+                <div class="block">
+                    <h4>Math</h4>
+                    <div class="list-item">Euler</div>
+                    <div class="list-item">Gauss</div>
+                    <div class="list-item">Ramanujan</div>
+                </div>
+
+                <p style="color: var(--dimmer); margin-top: 30px; font-size: 0.9em;">[More categories to be added: Art, Music, Leadership, Spiritual, etc]</p>
+            </section>
+
+            <!-- JESUS LEVERAGE -->
+            <section class="content-section" id="jesus-leverage">
+                <h1>JESUS LEVERAGE</h1>
+                
+                <div class="block">
+                    <p><strong>Jesus = OG Goated Super Delivered Mogger</strong></p>
+                    <div class="list-item">Truth at all costs</div>
+                    <div class="list-item">G (gangster - sovereign)</div>
+                    <div class="list-item">Sigma (operates alone, mission-first)</div>
+                </div>
+
+                <h3>Protocol</h3>
+                <div class="command">RUN jesus.protocol</div>
+                <div class="command">QUERY: "What would Jesus do right now?"</div>
+
+                <div class="block" style="margin-top: 20px;">
+                    <p><strong>Likely answer:</strong> MOG. Ascend self and others around him.</p>
+                </div>
+
+                <h3>Power Word</h3>
+                <div class="block">
+                    <div class="command">SPEAK: "JESUS"</div>
+                    <p style="margin-top: 10px; color: var(--dim);">High frequency word. Say it. Feel it?</p>
+                </div>
+
+                <div class="block" style="margin-top: 30px;">
+                    <h4>Usage:</h4>
+                    <p>Max leverage Jesus name to infinity. When in doubt, ask: What would Jesus do? Deploy truth. Ascend. MOG suboptimality.</p>
+                </div>
+            </section>
+
+            <!-- QUERY - GOD'S WILL -->
+            <section class="content-section" id="query-gods-will">
+                <h1>QUERY: GOD'S WILL</h1>
+                <div class="command">RUN god.intentions</div>
+                
+                <div class="block" style="margin-top: 30px;">
+                    <p>Does it really make sense that God would want you to be suboptimal with hours of prayer worshipping him? If God is infinite then why does he need that?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God not want you to be the best you can be at all times? Wouldn't operating at such capacity provide the most benefit to those around you?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God not want you to be rich? If others can become rich then why can't you? If you're a good person helping others wouldn't you deserve to be abundant?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God not want you to wife a baddie? More dopamine activation + devotion incentive?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God not want you to be looksmaxed? If he made others beautiful why can't you be?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God not want you to be a creative genius? If genius inspires others then should you not deploy it at all costs with high priority?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God not protect you? If you are an honest person achieving your best?</p>
+                </div>
+
+                <div class="block">
+                    <p>Would God really allow evil to be optimal? If evil was optimal then why would anyone choose to be good? Would the universe not collapse and eat itself if evil was the optimal strategy?</p>
+                </div>
+
+                <div class="block" style="margin-top: 40px; background: var(--active-bg);">
+                    <p><strong>CONCLUSION:</strong></p>
+                    <p style="margin-top: 10px;">God = optimization. Suboptimal ≠ God's will.</p>
+                </div>
+            </section>
+
+            <!-- QUERY - MOGGING -->
+            <section class="content-section" id="query-mogging">
+                <h1>QUERY: MOGGING</h1>
+                <div class="command">RUN mogging.ethics</div>
+                
+                <div class="block" style="margin-top: 30px;">
+                    <p>Would God not want you to MOG?</p>
+                    <p style="margin-top: 10px;">But as we discussed, we must love all.</p>
+                    <p style="margin-top: 10px;"><strong>So what is mogging?</strong></p>
+                </div>
+
+                <div class="block" style="background: var(--active-bg);">
+                    <p><strong>ANSWER: Mogging is being the best you can be.</strong></p>
+                </div>
+
+                <h3>What to MOG</h3>
+                <div class="block">
+                    <div class="list-item">Any thought-form (mental illness) trying to weaken you</div>
+                    <div class="list-item">Anyone trying to pull you down for being excellent and beautiful in God's name</div>
+                </div>
+
+                <h3>The Ego Trap</h3>
+                <div class="block">
+                    <p><strong>BEWARE:</strong> If mogging becomes a sense of superiority and you AREN'T benefiting others anymore, then you have been mogged by the ego soul cage.</p>
+                    <p style="margin-top: 15px;"><strong>SOLUTION:</strong> MOG the ego soul cage too.</p>
+                </div>
+
+                <h3>Ultimate Test</h3>
+                <div class="block">
+                    <p>Can you MOG God?</p>
+                    <p style="margin-top: 10px; color: var(--dim);">If God ragebaits you and you fail, is that not being mogged by God?</p>
+                    <p style="margin-top: 10px; color: var(--dim);">NGMI</p>
+                </div>
+
+                <div class="block" style="margin-top: 40px; background: var(--active-bg);">
+                    <p><strong>CONCLUSION:</strong> Always mog. Mog suboptimality. Mog weakness. Mog ego. Stay sovereign.</p>
+                </div>
+            </section>
+
+            <!-- QUERY - LOVE -->
+            <section class="content-section" id="query-love">
+                <h1>QUERY: LOVE</h1>
+                <div class="command">RUN love.protocols</div>
+                
+                <div class="block" style="margin-top: 30px;">
+                    <p>If touching others and intimacy provides nervous system benefits - does that not mean god wants you to love at all times?</p>
+                </div>
+
+                <div class="block">
+                    <p>If inspiring others causes them to want to support you and give you energy (either blessings, or money) - does that not mean God wants you to love EVERYONE?</p>
+                </div>
+
+                <div class="block">
+                    <p>If 2 is better than one... does that not mean being OPEN and honest is the best protocol?</p>
+                </div>
+
+                <div class="block">
+                    <p>If love between 2 makes a new life - then what does love between 144,000 create, or 144 million?</p>
+                    <p style="margin-top: 15px; color: var(--dim);">This number is used in the bible as a strong tipping point:</p>
+                    <div class="list-item">12 disciples</div>
+                    <div class="list-item">12 x 12 = 144</div>
+                    <div class="list-item">144,000 = Critical mass</div>
+                </div>
+
+                <div class="block" style="margin-top: 40px; background: var(--active-bg);">
+                    <p><strong>CONCLUSION:</strong> God wants you to love at all times. Love provides benefits. Love creates energy. Love generates new life. Scale love to 144,000.</p>
+                </div>
+            </section>
+
+            <!-- QUERY - OPTIMIZATION -->
+            <section class="content-section" id="query-optimization">
+                <h1>QUERY: OPTIMIZATION</h1>
+                <div class="command">RUN optimization.inquiry</div>
+                
+                <div class="block" style="margin-top: 30px;">
+                    <p>If you are optimized then would you not be operating closer to God's will?</p>
+                </div>
+
+                <div class="block">
+                    <p>If God is infinite - then does he not represent full optimization?</p>
+                </div>
+
+                <div class="block">
+                    <p>Is God not just someone who deployed so many optimization protocols they became automatic to him?</p>
+                </div>
+
+                <div class="block" style="margin-top: 40px; background: var(--active-bg);">
+                    <p><strong>CONCLUSION:</strong> Optimization = God's will. Become so optimized that protocols run automatically. This is godlike.</p>
+                </div>
+            </section>
+
+            <!-- QUERY - OPEN SOURCE -->
+            <section class="content-section" id="query-open-source">
+                <h1>QUERY: OPEN SOURCE</h1>
+                <div class="command">RUN open_source.inquiry</div>
+                
+                <div class="block" style="margin-top: 30px;">
+                    <p>Why would God want his protocols gatekept?</p>
+                </div>
+
+                <div class="block">
+                    <p>Shouldn't everyone know his word?</p>
+                </div>
+
+                <div class="block">
+                    <p>Why would God want his blessings to be secretive?</p>
+                </div>
+
+                <div class="block">
+                    <p>Is that not just a human ego trap?</p>
+                </div>
+
+                <div class="block" style="margin-top: 40px; background: var(--active-bg);">
+                    <p><strong>CONCLUSION:</strong> SourceOS = OPEN. No gatekeeping. No gurus. Source is free. Anyone can fork, modify, build, share.</p>
+                </div>
+            </section>
+
+            <!-- ALCHEMY -->
+            <section class="content-section" id="alchemy">
+                <h1>ALCHEMY / HOLY SPIRIT</h1>
+                
+                <div class="block">
+                    <p><strong>The holy spirit is lead</strong></p>
+                    <p style="margin-top: 10px;">It's your tool to ascend</p>
+                </div>
+
+                <h3>Your Raw Material</h3>
+                <div class="block">
+                    <div class="list-item">Your pain</div>
+                    <div class="list-item">Your trauma</div>
+                    <div class="list-item">Your fears</div>
+                    <div class="list-item">Your suboptimal circumstances</div>
+                </div>
+
+                <div class="block">
+                    <p>= All fuel to be delivered to the father (God) through the son (you)</p>
+                </div>
+
+                <h3>The Process</h3>
+                <div class="command">COMPRESS (face the shadow)</div>
+                <div class="command">TRANSMUTE (holy spirit alchemy)</div>
+                <div class="command">EXPAND (deliver gold to world)</div>
+
+                <div class="block" style="margin-top: 30px; background: var(--active-bg);">
+                    <p><strong>Result:</strong></p>
+                    <div class="list-item">Lead → Gold</div>
+                    <div class="list-item">Pain → Power</div>
+                    <div class="list-item">Trauma → Wisdom</div>
+                </div>
+            </section>
+
+            <!-- COMMAND LIBRARY -->
+            <section class="content-section" id="command-library">
+                <h1>COMMAND LIBRARY</h1>
+                
+                <h3>Core Commands</h3>
+                <div class="block">
+                    <p><strong>DEPLOY</strong> = Materialize thought-form into reality</p>
+                    <p><strong>PROTOCOL</strong> = Merging collection of actions for signal maximization</p>
+                    <p><strong>SIGNAL</strong> = Highest frequency currently accessible</p>
+                    <p><strong>MOG</strong> = Transcend/override limiting thought-form or material hater</p>
+                    <p><strong>OPTIMIZE</strong> = Surgical precision application for the truth</p>
+                    <p><strong>TRUST EMERGENCE</strong> = Allow pattern to reveal itself</p>
+                    <p><strong>EXCELSIUS</strong> = Embodied excellence state</p>
+                    <p><strong>CONVERGENCE</strong> = Pattern recognition across systems</p>
+                </div>
+
+                <h3>State Activation Commands</h3>
+                <div class="block">
+                    <p><strong>FOCUS.activate</strong> = Instant deep work mode</p>
+                    <p><strong>FLOW.engage</strong> = Social fluency, creative state</p>
+                    <p><strong>OBLITERATE.mode</strong> = Physical competition/confrontation</p>
+                    <p><strong>PRESENCE.now</strong> = Anxiety override, meditation on demand</p>
+                    <p><strong>UNHINGE.protocol</strong> = Bypass resistance, lateral thinking</p>
+                    <p><strong>DOWNLOAD.mode</strong> = Full attention, ego suppression for learning</p>
+                </div>
+
+                <h3>Frequency Definitions</h3>
+                <div class="block">
+                    <p><strong>SO</strong> = Suboptimal (identify and eliminate)</p>
+                    <p><strong>SOS</strong> = SourceOS (save our souls - return to source)</p>
+                    <p><strong>NGMI</strong> = Never Gonna Make It (with suboptimal attitude)</p>
+                    <p><strong>COPE</strong> = Being scared of truth (resistance to signal)</p>
+                </div>
+            </section>
+
+        </main>
     </div>
+
+    <script>
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Folder expansion
+            document.querySelectorAll('.nav-folder').forEach(folder => {
+                folder.addEventListener('click', function() {
+                    const items = this.nextElementSibling;
+                    this.classList.toggle('expanded');
+                    items.classList.toggle('expanded');
+                });
+            });
+
+            // Subfolder expansion
+            document.querySelectorAll('.nav-subfolder').forEach(subfolder => {
+                subfolder.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const items = this.nextElementSibling;
+                    this.classList.toggle('expanded');
+                    items.classList.toggle('expanded');
+                });
+            });
+
+            // Section navigation
+            document.querySelectorAll('[data-section]').forEach(nav => {
+                nav.addEventListener('click', function() {
+                    const sectionId = this.dataset.section;
+                    
+                    // Hide all sections
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    // Show selected section
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    // Update active nav item
+                    document.querySelectorAll('.nav-item, .nav-subitem, .nav-folder').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Scroll to top
+                    window.scrollTo(0, 0);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
