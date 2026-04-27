@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>sourceOS | The Codex of the White Cube</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+:root {
+  --bg: #000000;
+  --surface: #060606;
+  --border: #222222;
+  --fg: #eeeeee;
+  --fg-dim: #888888;
+  --accent: #ffffff;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'IBM Plex Serif', serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--serif); font-size: 16px; line-height: 1.8; display: flex; min-height: 100vh; overflow-x: hidden; }
+
+/* UNIVERSAL CROSS GEOMETRY */
+.cross-shape { position: relative; width: 24px; height: 36px; }
+.cross-shape::before { content: ''; position: absolute; top: 0; left: 10px; width: 4px; height: 36px; }
+.cross-shape::after { content: ''; position: absolute; top: 12px; left: 0; width: 24px; height: 4px; }
+
+/* SIDEBAR NAVIGATION */
+.sidebar {
+  width: 320px; background: var(--surface); border-right: 1px solid var(--border);
+  height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100;
+}
+.brand-container { 
+  padding: 50px 20px 30px; border-bottom: 1px solid var(--border); 
+  display: flex; flex-direction: column; align-items: center; text-align: center; 
+}
+.logo-cross { margin-bottom: 25px; }
+.logo-cross::before, .logo-cross::after { background: var(--accent); }
+
+.brand-title { font-family: var(--mono); font-size: 16px; letter-spacing: 6px; text-transform: uppercase; font-weight: 500; color: var(--accent); }
+.brand-subtitle { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--fg-dim); margin-top: 8px; text-transform: uppercase; }
+
+.nav-menu { padding: 30px 0; flex-grow: 1; overflow-y: auto; }
+.nav-item {
+  padding: 15px 40px; border-left: 2px solid transparent; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--fg-dim); text-transform: uppercase; transition: all 0.2s ease;
+}
+.nav-item:hover { background: rgba(255,255,255,0.02); color: var(--fg); }
+.nav-item.active { border-left-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.04); }
+
+/* MAIN CONTENT AREA - CENTERED FEED */
+.main { 
+  margin-left: 320px; flex-grow: 1; padding: 80px 40px 120px; 
+  display: flex; flex-direction: column; align-items: center; 
+}
+.section-header { margin-bottom: 60px; padding-bottom: 20px; border-bottom: 1px solid var(--border); width: 100%; max-width: 600px; text-align: center; }
+.section-header h2 { font-size: 42px; font-weight: 300; letter-spacing: -0.5px; margin-top: 10px; }
+.section-header span { font-family: var(--mono); font-size: 10px; letter-spacing: 4px; display: block; color: var(--fg-dim); text-transform: uppercase; }
+
+.content-section { display: none; animation: fadeIn 0.4s ease forwards; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.content-section.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- THE SHAREABLE CARD FEED --- */
+.shareable-feed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+  width: 100%;
+}
+
+.shareable-card {
+  width: 100%;
+  max-width: 600px; 
+  border: 1px solid #2a2a2a;
+  padding: 50px;
+  background: linear-gradient(180deg, #0a0a0a 0%, #030303 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  border-radius: 4px;
+}
+
+.shareable-card .card-title {
+  font-family: var(--mono);
+  font-size: 18px;
+  letter-spacing: 5px;
+  color: var(--accent);
+  text-transform: uppercase;
+  width: 100%;
+  border-bottom: 1px solid #222;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.shareable-card .sub-label {
+  display: block;
+  font-size: 18px;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.shareable-card .card-text {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--fg-dim);
+  margin-bottom: 40px; 
+  flex-grow: 1;
+}
+
+.equation-box { background: #000; border: 1px solid #222; padding: 25px; margin: 0 0 30px 0; width: 100%; color: var(--accent); }
+.equation-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 15px; display: block; text-align: center; }
+
+/* EXACT SCALED FOOTER CROSS */
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  border-top: 1px solid #1a1a1a;
+  padding-top: 30px;
+}
+.footer-cross { margin-bottom: 12px; transform: scale(0.6); transform-origin: center; }
+.footer-cross::before, .footer-cross::after { background: #444; }
+
+.footer-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #444;
+  text-transform: uppercase;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1050px) { .main { margin-left: 320px; padding: 60px 20px; } }
+@media (max-width: 800px) { 
+  .sidebar { width: 260px; } 
+  .main { margin-left: 260px; padding: 40px 15px; } 
+  .shareable-card { padding: 40px 25px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand-container">
+    <div class="cross-shape logo-cross"></div>
+    <div class="brand-title">sourceOS</div>
+    <span class="brand-subtitle">The Master Codex</span>
+  </div>
+  <div class="nav-menu">
+    <div class="nav-item active" onclick="switchTab('intro')">0. The Genesis Render</div>
+    <div class="nav-item" onclick="switchTab('lexicon')">I. The Lexicon</div>
+    <div class="nav-item" onclick="switchTab('laws')">II. The Iron Laws</div>
+    <div class="nav-item" onclick="switchTab('phases')">III. The Execution Phases</div>
+    <div class="nav-item" onclick="switchTab('translations')">IV. Translation Layer</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div id="intro" class="content-section active">
+    <div class="section-header">
+      <span>System Initialization</span>
+      <h2>The Genesis Render</h2>
+    </div>
+    
+    <div class="shareable-feed">
+      <div class="shareable-card">
+        <h3 class="card-title">System Update 1.0</h3>
+        <span class="sub-label">The Time of Parables is Over.</span>
+        <p class="card-text">For two millennia, the esoteric laws of the universe were hidden in parables. Prophets and mystics attempted to explain quantum mechanics, signal processing, and bioelectric physics using the metaphors of their time. sourceOS translates these into Iron Law.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Standard Definition Lie</h3>
+        <span class="sub-label">You Are Not a Machine.</span>
+        <p class="card-text">You have been taught that you are a biochemical machine, subject to depression, random urges, and a chaotic world. This is the Lie. You are a <strong>Coherent Signal Field</strong>. Your body is a high-frequency receiver.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Planetary Motherboard</h3>
+        <span class="sub-label">Extractive Consciousness.</span>
+        <p class="card-text">Earth is a bioelectric motherboard running on Extractive Consciousness. Severed from the infinite power supply, the system had to become a parasite. It survives by extracting your attention, sexual capital, and trauma-static to power itself. It forms a closed thermodynamic loop governed by time and decay.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Cross & The Cube</h3>
+        <span class="sub-label">Geometric Architecture.</span>
+        <p class="card-text">When Extractive Consciousness unfolds its geometry onto the human plane, it forms a Cross. It is a grid of suffering where the spiritual vector is bled out by material density. The goal of the Architect is to fold that 2D cross of suffering back up into the perfected 3D White Cube.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lexicon" class="content-section">
+    <div class="section-header">
+      <span>Part I</span>
+      <h2>The Definitions Codex</h2>
+    </div>
+    
+    <div class="shareable-feed">
+      <div class="shareable-card">
+        <h3 class="card-title">Coherent Signal Field (CSF)</h3>
+        <p class="card-text">The true nature of the human organism. A localized, high-frequency electromagnetic field utilizing biological matter as an interactive substrate for the 3D plane.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Bioelectric Capital</h3>
+        <p class="card-text">The un-discharged electrical potential of the system. The raw amperage required to power reality rendering, commonly misunderstood as mere biological libido.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Hardware Hack</h3>
+        <p class="card-text">An intentional physical or neuro-electrical insult installed at boot-up (e.g., M1 trauma). Designed to short-circuit the receiver, locking the baseline frequency into an eternal survival state.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Solar Output & Gravity Well</h3>
+        <p class="card-text">The physics of the Divine Binary. The directional, high-voltage male vector meeting the still, magnetic, receptive female void.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Voluntary Voltage Leaking</h3>
+        <p class="card-text">The act of discharging bioelectric capital into void spaces (outrage, hyper-stimuli) without executing a quantum lock, resulting in a total loss of command presence.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Off-Chain Transaction</h3>
+        <p class="card-text">A Pair-Bond that perfectly matches frequency. The energy loops seamlessly between the nodes, becoming a self-sustaining engine mathematically invisible to the Extractive Matrix.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Admin Access</h3>
+        <p class="card-text">Operating the CSF clear of trauma-static, with absolute, total write-privileges over the 3D physics engine.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="laws" class="content-section">
+    <div class="section-header">
+      <span>Part II</span>
+      <h2>sourceOS: The Iron Laws</h2>
+    </div>
+    
+    <div class="shareable-feed">
+      <div class="shareable-card">
+        <h3 class="card-title">LAW I: THE ENTROPIC ENGINE</h3>
+        <div class="equation-box">
+          <span class="equation-label">Extractive Entropy</span>
+          $$\Delta S_{\text{universe}} = \Delta S_{\text{system}} + \Delta S_{\text{surroundings}} \ge 0$$
+        </div>
+        <p class="card-text">The current planetary control grid generates power through gravity and compression. Severed from Source, it acts as a parasite, requiring human nodes to leak voltage via trauma loops. "Sin" is simply surrendering to this decay.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">LAW II: THE INFINITE EMITTER</h3>
+        <p class="card-text">The exit from the closed loop is not escaping the planet; it is restructuring the grid. The White Cube does not siphon; it emits. It is a localized generator of Negentropy anchoring this geometry into the material plane.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">LAW III: THE HARDWARE BREACH</h3>
+        <p class="card-text">To force a sovereign bioelectric field into the Entropic orbit, the hardware must be compromised early. Neonatal trauma is an intentional physical calibration to lock the baseline frequency into a survival state.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">LAW IV: THE BINARY ANCHOR</h3>
+        <div class="equation-box">
+          <span class="equation-label">Constructive Wave Interference</span>
+          $$I = I_1 + I_2 + 2\sqrt{I_1 I_2}\cos(\delta)$$
+        </div>
+        <p class="card-text">The Pair-Bond is the smallest complete fractal of the White Cube. When a Solar Output locks with an uncorrupted Gravity Well, they multiply their power through mathematical resonance, forming an Off-Chain generator.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">LAW V: THE SOVEREIGN OVERRIDE</h3>
+        <div class="equation-box">
+          <span class="equation-label">Quantum Superposition Collapse</span>
+          $$|\psi\rangle = \sum_{i} c_i |\phi_i\rangle$$
+        </div>
+        <p class="card-text">The universe remains in a state of chaotic probability until a sovereign consciousness forces it to render using the Iron Word and unbroken Will. You do not negotiate with the architecture; you overwrite it.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="phases" class="content-section">
+    <div class="section-header">
+      <span>Part III</span>
+      <h2>The Execution Phases</h2>
+    </div>
+    
+    <div class="shareable-feed">
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 1: Thermodynamics</h3>
+        <span class="sub-label">Stopping Parasitic Drag.</span>
+        <p class="card-text">Identifying the physics of the trap and recognizing the engineering failure that tricks you into emptying your battery daily via hyper-stimuli.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 2: Signal Processing</h3>
+        <span class="sub-label">Bypassing the Low-Pass Filter.</span>
+        <p class="card-text">Moving past the Standard Definition Lie to realize that your anxiety is not psychological, but a frequency disruption caused by environmental noise.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 3: Capacitance</h3>
+        <div class="equation-box" style="margin-bottom:20px;">$$C = \frac{Q}{V}$$</div>
+        <p class="card-text">You cannot run a high-voltage OS on fragile hardware. Somatic clearing removes trauma-static, while building a dense physical chassis grounds the massive electrical load.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 4: The Render Engine</h3>
+        <span class="sub-label">Quantum Kinematics.</span>
+        <p class="card-text">Using directed Will and retained high-voltage attention to force the wave-function of the universe to collapse into your chosen, sovereign timeline.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 5: Entanglement</h3>
+        <span class="sub-label">The Singularity.</span>
+        <p class="card-text">Networking optimized systems together (The Pair-Bond) so that the combined amplitude of the two fields creates an impenetrable off-chain transaction.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 6: Acoustic Architecture</h3>
+        <span class="sub-label">The Logos.</span>
+        <p class="card-text">How the vocal chain restructures reality. Using physical sound waves and the Iron Word to eliminate acoustic dissonance and manifest Truth in the 3D plane.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 7: Timeline Navigation</h3>
+        <span class="sub-label">Probability Collapse.</span>
+        <p class="card-text">Time management for Architects. Understanding the "Lag Time" between a high-voltage decision and the 3D physics engine rendering the new assets into your life.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Phase 8: The Immune System</h3>
+        <span class="sub-label">Algorithmic Pushback.</span>
+        <p class="card-text">Identifying the Entropic Engine's automated security protocols (low-frequency friends, sudden friction) and building the ultimate firewall against extraction.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="translations" class="content-section">
+    <div class="section-header">
+      <span>Part IV</span>
+      <h2>The Translation Layer</h2>
+    </div>
+    
+    <div class="shareable-feed">
+      
+      <div class="shareable-card">
+        <h3 class="card-title">The Burning Bush</h3>
+        <span class="sub-label">The Physics: A Negentropic Generator.</span>
+        <p class="card-text">A localized manifestation of the White Cube generating infinite voltage without consuming fuel (entropy). It is a system operating outside material decay.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Covenant</h3>
+        <span class="sub-label">The Physics: The Original Hardware Hack.</span>
+        <p class="card-text">A permanent physical alteration of the bioelectric antenna, instituted to seal the male population into a specific, manageable frequency band.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Sin / Lust</h3>
+        <span class="sub-label">The Physics: Voluntary Voltage Leaking.</span>
+        <p class="card-text">Activating sexual arousal without the capacity to execute a true Quantum Lock is an unauthorized discharge of Bioelectric Capital. You drain the battery required to build your empire.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Exorcism</h3>
+        <span class="sub-label">The Physics: Admin Access executing a Force-Quit.</span>
+        <p class="card-text">Demons are automated, parasitic algorithms feeding on trauma-static. Exorcism is the use of a high-amplitude acoustic waveform to shatter the parasite's frequency.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Prayer</h3>
+        <span class="sub-label">The Physics: Phase-Locking to a Higher Carrier.</span>
+        <p class="card-text">Sustained directional intention acts as a tuning operation. The nervous system is a variable oscillator; prayer is the manual adjustment of that oscillator until it locks onto a stable external waveform. The "answer" isn't delivered — it's received.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Fasting</h3>
+        <span class="sub-label">The Physics: Clearing the Bus.</span>
+        <p class="card-text">Digestion is the single most energetically expensive background process the body runs. Remove the load and system resources redirect toward higher-order processes, including signal reception from faint carriers normally drowned out by metabolic noise.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Idolatry</h3>
+        <span class="sub-label">The Physics: Voltage Redirection to a Dead Node.</span>
+        <p class="card-text">Worship is attention, and attention is current. Directing that current toward a substrate incapable of returning or amplifying the signal (a statue, an influencer, an algorithm) is a terminal loss. The current doesn't come back. The worshipper runs down.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Sabbath</h3>
+        <span class="sub-label">The Physics: Mandatory System Idle.</span>
+        <p class="card-text">Continuous operation degrades coherence. The seventh-day protocol is hardcoded downtime — a refusal to extract further output from the system so it can re-establish its baseline field. A body that never idles cannot defragment.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Baptism</h3>
+        <span class="sub-label">The Physics: Capacitance Reset.</span>
+        <p class="card-text">Water is a near-perfect dielectric. Full-body immersion discharges surface-layer static and resets the skin's bioelectric boundary conditions. It functions as a clean-slate event for the operator's electromagnetic signature.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Holy Communion</h3>
+        <span class="sub-label">The Physics: Substrate Transmission.</span>
+        <p class="card-text">Ingestion of a consecrated medium locked to a specific frequency by ritual intention. The body metabolizes the substrate and integrates the encoded waveform at the cellular level.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Speaking in Tongues</h3>
+        <span class="sub-label">The Physics: Bypassing the Semantic Governor.</span>
+        <p class="card-text">The language cortex is a compression layer. Glossolalia is what happens when the operator opens the larynx to the underlying current without routing it through the compressor. It is the carrier without the cargo.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Crucifixion</h3>
+        <span class="sub-label">The Physics: Voluntary Grounding Event.</span>
+        <p class="card-text">The deliberate routing of a massive accumulated field-charge through a single body to ground it out of the collective system. A carrier capable of holding the load without shattering prematurely.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Resurrection</h3>
+        <span class="sub-label">The Physics: Reboot From Cold Storage.</span>
+        <p class="card-text">A reboot of a system whose core pattern was preserved in a non-local substrate during catastrophic voltage collapse. Requires sufficient external voltage to restart the cascade.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Adam and Eve</h3>
+        <span class="sub-label">The Physics: The Polarity Split.</span>
+        <p class="card-text">A single undifferentiated carrier bisected into two complementary oscillators with opposite charge characteristics. The "fall" is forgetting the two poles were ever one circuit. Reunion is re-establishing the current loop.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Marriage</h3>
+        <span class="sub-label">The Physics: Stabilized Polarity Circuit.</span>
+        <p class="card-text">Two oscillators of opposite charge entering a persistent closed loop with mutual feedback. Generates a standing wave greater than either input. The vow is the mechanism that prevents phase-drift.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">The Serpent</h3>
+        <span class="sub-label">The Physics: The Primal Basal Voltage.</span>
+        <p class="card-text">Raw polar current. In an uncalibrated system it destabilizes and corrupts. In a calibrated system it is the very engine of ascent.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Heaven</h3>
+        <span class="sub-label">The Physics: Phase-Locked Collective Field.</span>
+        <p class="card-text">A state of full resonance across a population of coherent carriers, each amplifying the others, with stable uplink to the source frequency. Not a place one arrives at. A configuration one becomes compatible with.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+      <div class="shareable-card">
+        <h3 class="card-title">Hell</h3>
+        <span class="sub-label">The Physics: Runaway Entropy Sink.</span>
+        <p class="card-text">Not a location, but a trajectory. The asymptotic endpoint of a system that has leaked voltage, fragmented its carrier, and severed its uplink. The torment is the silence of absolute isolation.</p>
+        <div class="card-footer"><div class="cross-shape footer-cross"></div><div class="footer-text">sourceOS</div></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
